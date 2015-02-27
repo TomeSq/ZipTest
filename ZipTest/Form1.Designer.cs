@@ -35,7 +35,8 @@
             this.textDist = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.progressBar = new System.Windows.Forms.ProgressBar();
-            this.label3 = new System.Windows.Forms.Label();
+            this.labelProgress = new System.Windows.Forms.Label();
+            this.btnCompress = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -97,24 +98,35 @@
             this.progressBar.Size = new System.Drawing.Size(497, 23);
             this.progressBar.TabIndex = 6;
             // 
-            // label3
+            // labelProgress
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(13, 187);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(29, 12);
-            this.label3.TabIndex = 3;
-            this.label3.Text = "進捗";
+            this.labelProgress.AutoSize = true;
+            this.labelProgress.Location = new System.Drawing.Point(13, 187);
+            this.labelProgress.Name = "labelProgress";
+            this.labelProgress.Size = new System.Drawing.Size(29, 12);
+            this.labelProgress.TabIndex = 3;
+            this.labelProgress.Text = "進捗";
+            // 
+            // btnCompress
+            // 
+            this.btnCompress.Location = new System.Drawing.Point(437, 139);
+            this.btnCompress.Name = "btnCompress";
+            this.btnCompress.Size = new System.Drawing.Size(75, 23);
+            this.btnCompress.TabIndex = 7;
+            this.btnCompress.Text = "圧縮！";
+            this.btnCompress.UseVisualStyleBackColor = true;
+            this.btnCompress.Click += new System.EventHandler(this.btnCompress_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(515, 335);
+            this.Controls.Add(this.btnCompress);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.btnDistRef);
             this.Controls.Add(this.textDist);
-            this.Controls.Add(this.label3);
+            this.Controls.Add(this.labelProgress);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.btnSrcRef);
             this.Controls.Add(this.textSrc);
@@ -135,7 +147,8 @@
         private System.Windows.Forms.TextBox textDist;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ProgressBar progressBar;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label labelProgress;
+        private System.Windows.Forms.Button btnCompress;
     }
 }
 
