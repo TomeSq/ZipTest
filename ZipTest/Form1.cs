@@ -61,24 +61,39 @@ namespace ZipTest
             }
         }
 
-        private int _uptoFileCount;
-        private int _totalFileCount;
+        private int _uptoFileCount; // 処理したファイル数
+        private int _totalFileCount; // 処理対象のファイル
         private void btnCompress_Click(object sender, EventArgs e)
+        {
+            if (textSrc.Text.Length <= 0)
+            {
+                MessageBox.Show("圧縮フォルダーを指定してください。");
+                return;
+            }
+
+            if (textDist.Text.Length <= 0)
+            {
+                MessageBox.Show("保存先のファイルを指定してください。");
+                return;
+            }
+
+            // プログレスバー初期化
+            progressBar.Minimum = 0;
+            progressBar.Maximum = 100;
+            progressBar.Value = 0;
+            _uptoFileCount = 0;
+            _totalFileCount = FolderContentsCount(textSrc.Text);
+
+            ZipCompressDelegate compressDelegate = new ZipCompressDelegate(ZipCompress);
+            compressDelegate.BeginInvoke(null, null);
+        }
+
+        private delegate void ZipCompressDelegate();
+
+        private void ZipCompress()
         {
             try
             {
-                if (textSrc.Text.Length <= 0)
-                {
-                    MessageBox.Show("圧縮フォルダーを指定してください。");
-                    return;
-                }
-
-                if (textDist.Text.Length <= 0)
-                {
-                    MessageBox.Show("保存先のファイルを指定してください。");
-                    return;
-                }
-
                 #region Zip処理イベント関係
                 FastZipEvents fastZipEvents = new FastZipEvents();
                 fastZipEvents.ProcessFile = new ICSharpCode.SharpZipLib.Core.ProcessFileHandler(ProcessFile); // 1つの圧縮展開を始める前に呼び出される
@@ -89,33 +104,50 @@ namespace ZipTest
                 fastZipEvents.DirectoryFailure = new ICSharpCode.SharpZipLib.Core.DirectoryFailureHandler(DirectoryFailure); //フォルダの圧縮・解凍に失敗したとき
                 #endregion
 
-                // プログレスバー初期化
-                progressBar.Minimum = 0;
-                progressBar.Maximum = 100;
-                progressBar.Value = 0;
-                _uptoFileCount = 0;
-                _totalFileCount = FolderContentsCount(textSrc.Text);
-
                 FastZip fastZip = new FastZip(fastZipEvents);
                 fastZip.CreateEmptyDirectories = true; // 空フォルダも圧縮
                 fastZip.UseZip64 = UseZip64.Dynamic; // 必要に応じてzip64を行う
+
+                // カーソルを砂時計にする
+                Application.UseWaitCursor = true;
+
                 fastZip.CreateZip(textDist.Text, textSrc.Text, true, null, null); // 再帰的に圧縮
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
             }
+            finally
+            {
+                Application.UseWaitCursor = false;
+            }
         }
+
+        #region zipイベント処理関係
 
         //1つのファイルの圧縮、展開を始める時
         private void ProcessFile(Object sender, ICSharpCode.SharpZipLib.Core.ScanEventArgs e)
         {
             _uptoFileCount++;
-            progressBar.Value = _uptoFileCount * 100 / _totalFileCount;
-            progressBar.Update();
 
-            labelProgress.Text = string.Format("{0}/100", progressBar.Value);
-            labelProgress.Update();
+            // 画面更新するための匿名関数を作成
+            MethodInvoker progressUpdate = (MethodInvoker)delegate(){
+                progressBar.Value = _uptoFileCount * 100 / _totalFileCount;
+                progressBar.Update();
+
+                labelProgress.Text = string.Format("{0}/100", progressBar.Value);
+                labelProgress.Update();
+            };
+
+            // 別スレッドなら元のスレッドに処理を移譲する
+            if (this.InvokeRequired)
+            {
+                this.Invoke(progressUpdate);
+            }
+            else
+            {
+                progressUpdate.Invoke();
+            }
         }
 
         //1つのファイルの圧縮、展開の進行状況
@@ -167,5 +199,6 @@ namespace ZipTest
             }
             return result;
         }
+        #endregion
     }
 }
